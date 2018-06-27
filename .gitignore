@@ -1,1 +1,8 @@
-.idea
+/composer.phar
+.DS_Store
+/.idea
+/vendor/
+/files/
+
+tmp.csv
+result.csv

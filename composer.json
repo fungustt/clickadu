@@ -1,0 +1,20 @@
+{
+  "name": "fungustt/clickadu",
+  "license": "MIT",
+  "description": "Clickadu test task",
+  "type": "project",
+  "autoload": {
+    "psr-4": {
+      "": "src/"
+    }
+  },
+  "require": {
+    "php": ">=7.1",
+    "mikey179/vfsStream": "~1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^5.7"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
