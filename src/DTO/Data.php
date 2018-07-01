@@ -9,28 +9,28 @@ class Data
     private $date;
 
     /**
-     * @var string
+     * @var float
      */
     private $a;
 
     /**
-     * @var string
+     * @var float
      */
     private $b;
 
     /**
-     * @var string
+     * @var float
      */
     private $c;
 
     /**
      * Data constructor.
      * @param string $date
-     * @param string $a
-     * @param string $b
-     * @param string $c
+     * @param float $a
+     * @param float $b
+     * @param float $c
      */
-    public function __construct(string $date, string $a, string $b, string $c)
+    public function __construct(string $date, float $a, float $b, float $c)
     {
         $this->date = $date;
         $this->a = $a;
@@ -47,25 +47,25 @@ class Data
     }
 
     /**
-     * @return string
+     * @return float
      */
-    public function getA(): string
+    public function getA(): float
     {
         return $this->a;
     }
 
     /**
-     * @return string
+     * @return float
      */
-    public function getB(): string
+    public function getB(): float
     {
         return $this->b;
     }
 
     /**
-     * @return string
+     * @return float
      */
-    public function getC(): string
+    public function getC(): float
     {
         return $this->c;
     }

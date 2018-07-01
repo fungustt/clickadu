@@ -10,21 +10,22 @@ class ConfigBuilderTest extends TestCase
     public function testConfigBuilderThrowOnEmptyDir()
     {
         $this->expectException(\Exception::class);
-        ConfigBuilder::build(['-n' => 'basename']);
+        ConfigBuilder::build([], 'appDir');
     }
 
-    public function testConfigBuilderThrowOnEmptyHost()
+    public function testConfigBuilderThrowOnWrongCount()
     {
         $this->expectException(\Exception::class);
-        ConfigBuilder::build(['-dir' => 'somedir']);
+        ConfigBuilder::build(['-c' => 'teststring'], 'appDir');
     }
 
     public function testConfigBuilderBuilds()
     {
         $config = new Config();
         $config->setFileDir('somedir');
-        $config->setDbName('basename');
+        $config->setFilesToConcatCount(2);
+        $config->setAppDir('appDir');
 
-        $this->assertEquals($config, ConfigBuilder::build(['-n' => 'basename', '-dir' => 'somedir']));
+        $this->assertEquals($config, ConfigBuilder::build(['-dir' => 'somedir'], 'appDir'));
     }
 }

@@ -4,5 +4,6 @@
 /vendor/
 /files/
 
-tmp.csv
 result.csv
+tmp/*
+!tmp/.gitkeep

@@ -1,29 +1,19 @@
 <?php
 namespace File;
 
-class FileIterator
+class FileIterator implements FileIteratorInterface
 {
     /**
-     * @var string
-     */
-    private $filePath;
-
-    /**
-     * FileIterator constructor.
      * @param string $filePath
+     *
+     * @return \Generator
      */
-    public function __construct($filePath)
+    public function getDataGenerator(string $filePath): \Generator
     {
-        $this->filePath = $filePath;
-    }
-
-
-    public function getDataCollection()
-    {
-        $handle = fopen($this->filePath, "r");
+        $handle = fopen($filePath, "r");
 
         while(!feof($handle)) {
-            yield trim(fgets($handle));
+            yield fgetcsv($handle, 10000, "; ");
         }
 
         fclose($handle);

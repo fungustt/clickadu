@@ -3,30 +3,21 @@ namespace Catalog;
 
 class FilePathsExtractor implements FilePathsExtractorInterface
 {
-    /**
-     * @param string $dir
-     *
-     * @return string[]
-     */
-    public function getFilePaths(string $dir): array
+    public function getFilePaths(string $dir, int $level = -1): \Generator
     {
-        $result = [];
-        $files = scandir($dir);
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
 
-        foreach ($files as $file) {
-            if (in_array($file, ['.', '..'])) {
-                continue;
-            }
-
-            if (is_dir($dir . '/' . $file)) {
-                $result = array_merge($result, $this->getFilePaths($dir . '/' . $file));
-            }
-
-            if (is_file($dir . '/' . $file)) {
-                $result []= $dir . '/' . $file;
-            }
+        if ($level > -1) {
+            $iterator->setMaxDepth($level);
         }
 
-        return $result;
+        foreach ($iterator as $path => $obj) {
+            if ($obj->isFile()) {
+                yield $path;
+            }
+        }
     }
 }

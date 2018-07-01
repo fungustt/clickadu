@@ -1,12 +1,10 @@
 <?php
 namespace Catalog;
 
-use Catalog\Validator\CSVValidator;
 use Catalog\Validator\ValidatorInterface;
-use File\FileInterface;
 use Exception;
 
-class FileLister
+class FileLister implements FileListerInterface
 {
     /**
      * @var ValidatorInterface[]
@@ -19,62 +17,39 @@ class FileLister
     private $filePathExtractor;
 
     /**
-     * @var string
-     */
-    private $appDir;
-
-    /**
      * FileLister constructor.
      *
-     * @param string $appDir
+     * @param FilePathsExtractorInterface $filePathExtractor
+     * @param ValidatorInterface[] ...$validators
      */
-    public function __construct(string $appDir)
-    {
-        $this->filePathExtractor = new FilePathsExtractor();
-
-        $this->validators = [
-            new CSVValidator()
-        ];
-
-        $this->appDir = $appDir;
+    public function __construct(
+        FilePathsExtractorInterface $filePathExtractor,
+        ValidatorInterface ...$validators
+    ) {
+        $this->filePathExtractor = $filePathExtractor;
+        $this->validators = $validators;
     }
 
     /**
      * @param null|string $fileDir
      *
-     * @return FileInterface[]
+     * @return \Generator
      *
      * @throws Exception
      */
-    public function getFileListFromDir(?string $fileDir): array
+    public function getFileList(string $fileDir): \Generator
     {
-        if (!CatalogChecker::check($fileDir, $this->appDir)) {
-            throw new Exception('Specified catalog not found or not exist. Please try again');
-        }
-
-        $dir = CatalogChecker::getFullPath($fileDir, $this->appDir);
-
-        $result = [];
-        $filePaths = $this->filePathExtractor->getFilePaths($dir);
-
-        foreach ($filePaths as $filePath) {
-            $file = $this->getFile($filePath);
-            if (null !== $file) {
-                $result []= $file;
-            }
-        }
-
-        return $result;
+        return $this->getFilesGenerator($this->filePathExtractor->getFilePaths($fileDir));
     }
 
-    private function getFile(string $filePath): ?FileInterface
+    private function getFilesGenerator(\Generator $filePaths)
     {
-        foreach ($this->validators as $validator) {
-            if ($validator::validate($filePath)) {
-                return $validator::getFile($filePath);
+        foreach($filePaths as $filePath) {
+            foreach ($this->validators as $validator) {
+                if ($validator->validate($filePath)) {
+                    yield $validator->getFile($filePath);
+                }
             }
         }
-
-        return null;
     }
 }

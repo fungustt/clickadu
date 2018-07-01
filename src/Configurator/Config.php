@@ -11,22 +11,12 @@ class Config
     /**
      * @var string
      */
-    private $dbHost = "localhost";
+    private $appDir;
 
     /**
-     * @var string
+     * @var int
      */
-    private $dbName;
-
-    /**
-     * @var null|string
-     */
-    private $dbUser;
-
-    /**
-     * @var null|string
-     */
-    private $dbPass;
+    private $filesToConcatCount;
 
     /**
      * @return string
@@ -47,64 +37,32 @@ class Config
     /**
      * @return string
      */
-    public function getDbHost(): string
+    public function getAppDir(): string
     {
-        return $this->dbHost;
+        return $this->appDir;
     }
 
     /**
-     * @param string $dbHost
+     * @param string $appDir
      */
-    public function setDbHost(string $dbHost)
+    public function setAppDir(string $appDir)
     {
-        $this->dbHost = $dbHost;
+        $this->appDir = $appDir;
     }
 
     /**
-     * @return string
+     * @return int
      */
-    public function getDbName(): string
+    public function getFilesToConcatCount(): int
     {
-        return $this->dbName;
+        return $this->filesToConcatCount;
     }
 
     /**
-     * @param string $dbName
+     * @param int $filesToConcatCount
      */
-    public function setDbName(string $dbName)
+    public function setFilesToConcatCount(int $filesToConcatCount)
     {
-        $this->dbName = $dbName;
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getDbUser(): ?string
-    {
-        return $this->dbUser;
-    }
-
-    /**
-     * @param null|string $dbUser
-     */
-    public function setDbUser(?string $dbUser)
-    {
-        $this->dbUser = $dbUser;
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getDbPass(): ?string
-    {
-        return $this->dbPass;
-    }
-
-    /**
-     * @param null|string $dbPass
-     */
-    public function setDbPass(?string $dbPass)
-    {
-        $this->dbPass = $dbPass;
+        $this->filesToConcatCount = $filesToConcatCount;
     }
 }

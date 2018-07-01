@@ -6,7 +6,7 @@ use Query\Connection\ConnectionInterface;
 
 class ConfigBuilder
 {
-    public static function build(array $arguments): Config
+    public static function build(array $arguments, string $appDir): Config
     {
         $config = new Config();
 
@@ -15,16 +15,12 @@ class ConfigBuilder
         }
         $config->setFileDir($arguments['-dir']);
 
-        $config->setDbHost($arguments['-h'] ?? ConnectionInterface::LOCALHOST);
-
-        if (!isset($arguments['-n'])) {
-            throw new Exception('Database name not specified. Please use key -n=basename');
+        if (isset($arguments['-c']) && !is_numeric($arguments['-c']) && !is_int($arguments['-c'])) {
+            throw new Exception('Files concat count must be right integer');
         }
-        $config->setDbName($arguments['-n']);
+        $config->setFilesToConcatCount($arguments['-c'] < 2 ? 2 : $arguments['-c']);
 
-        $config->setDbUser($arguments['-u'] ?? null);
-
-        $config->setDbPass($arguments['-p'] ?? null);
+        $config->setAppDir($appDir);
 
         return $config;
     }

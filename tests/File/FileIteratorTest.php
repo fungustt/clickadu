@@ -21,10 +21,10 @@ class FileIteratorTest extends TestCase
         $file = $root->getChild('file.csv');
         $file->setContent("1\r\n2\r\n3\r\n4");
 
-        $fileIterator = new FileIterator(vfsStream::url('rootDir/file.csv'));
+        $fileIterator = new FileIterator();
         $i = 1;
-        foreach($fileIterator->getDataCollection() as $data) {
-            $this->assertEquals($i, $data);
+        foreach($fileIterator->getDataGenerator(vfsStream::url('rootDir/file.csv')) as $data) {
+            $this->assertEquals($i, $data[0]);
             $i++;
         }
     }

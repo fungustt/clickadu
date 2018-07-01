@@ -1,16 +1,28 @@
 <?php
 namespace Handler\File;
 
-use Log\Logger;
+use File\FileIteratorInterface;
 use Validator\DateValidator;
 use DTO\Data;
 use File\CSVFile;
 use File\FileInterface;
-use File\FileIterator;
 
-class CSVHandler extends AbstractHandler implements HandlerInterface
+class CSVHandler implements HandlerInterface
 {
-    const DATA_VALIDATE_PATTERN = '/^[0-9]{4}\-[0-9]{2}\-[0-9]{2}\; [+-]?([0-9]*[.])?[0-9]+\; [+-]?([0-9]*[.])?[0-9]+\; [+-]?([0-9]*[.])?[0-9]+$/';
+    /**
+     * @var FileIteratorInterface
+     */
+    private $fileIterator;
+
+    /**
+     * CSVHandler constructor.
+     *
+     * @param FileIteratorInterface $fileIterator
+     */
+    public function __construct(FileIteratorInterface $fileIterator)
+    {
+        $this->fileIterator = $fileIterator;
+    }
 
     public function supports(FileInterface $file): bool
     {
@@ -21,36 +33,61 @@ class CSVHandler extends AbstractHandler implements HandlerInterface
         return false;
     }
 
-    public function handle(FileInterface $file)
+    public function aggregateToHandle(FileInterface $file, $handle)
     {
-        $iterator = new FileIterator($file->getFilePath());
+        $currentDto = null;
+        foreach($this->fileIterator->getDataGenerator($file->getFilePath()) as $dataArray) {
+            if (!$dataArray) {
+                continue;
+            }
 
-        Logger::log(sprintf("Started data consuming from file: %s", $file->getFilePath()));
+            $dataDto = $this->getData($dataArray);
 
-        foreach($iterator->getDataCollection() as $dataRow) {
-            $dataDto = $this->getData($dataRow);
-            if (null !== $dataDto) {
-                $this->saveDto($dataDto);
+            if (null === $currentDto) {
+                $currentDto = $dataDto;
+            } elseif (null !== $currentDto && $currentDto->getDate() === $dataDto->getDate()) {
+                /**
+                 * @var Data $currentDto
+                 */
+                $currentDto = new Data(
+                    $currentDto->getDate(),
+                    $currentDto->getA() + $dataDto->getA(),
+                    $currentDto->getB() + $dataDto->getB(),
+                    $currentDto->getC() + $dataDto->getC()
+                );
             } else {
-                Logger::log(sprintf("Row: \"%s\" skipped, inappropriate data string", $dataRow));
+                $this->saveDataToHandle($currentDto, $handle);
+                $currentDto = $dataDto;
             }
         }
-
-        Logger::log(sprintf("Finished data consuming. Moving to next step\r\n"));
     }
 
-    private function getData(string $dataRow): ?Data
+    private function getData(array $dataArray): ?Data
     {
-        if (!preg_match(self::DATA_VALIDATE_PATTERN, $dataRow)) {
-            return null;
-        }
-
-        $dataArray = explode("; ", $dataRow);
-
         if (!DateValidator::validate($dataArray[0])) {
             return null;
         }
 
+        if (!is_numeric($dataArray[1])
+            || !is_numeric($dataArray[2])
+            || !is_numeric($dataArray[3])
+        ) {
+            return null;
+        }
+
         return new Data(...$dataArray);
+    }
+
+    private function saveDataToHandle(Data $data, $handle)
+    {
+        fwrite(
+            $handle,
+            sprintf("%s; %s; %s; %s\r\n",
+                $data->getDate(),
+                $data->getA(),
+                $data->getB(),
+                $data->getC()
+            )
+        );
     }
 }

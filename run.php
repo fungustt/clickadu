@@ -6,12 +6,10 @@ use Configurator\Configurator;
 use Configurator\ConfigBuilder;
 
 try {
-
     $configArguments = CliArgumentInterpreter::getConfigArguments($argv);
-    $config = ConfigBuilder::build($configArguments);
-    Configurator::prepareApp($config);
-
-    (new App($config->getFileDir(), __DIR__))->run();
+    $config = ConfigBuilder::build($configArguments, __DIR__);
+    $app = Configurator::prepareApp($config);
+    $app->run();
 
 } catch (Exception $e) {
     die($e->getMessage());

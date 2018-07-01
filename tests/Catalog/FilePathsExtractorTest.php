@@ -25,12 +25,17 @@ class FilePathsExtractorTest extends TestCase
     public function testGetFilePaths()
     {
         $extractor = new FilePathsExtractor();
+
+        $arrayToTest = [];
+        foreach($extractor->getFilePaths(vfsStream::url('rootDir')) as $file) {
+            $arrayToTest []= $file;
+        }
         $this->assertEquals(
             [
                 'vfs://rootDir/file1.csv',
                 'vfs://rootDir/subDir/file2.csv',
             ],
-            $extractor->getFilePaths(vfsStream::url('rootDir'))
+            array_reverse($arrayToTest)
         );
     }
 }

@@ -18,18 +18,18 @@ class CatalogCheckerTest extends TestCase
 
     public function testGetFullPath()
     {
-        $this->assertEquals('/var/www/../somepath', CatalogChecker::getFullPath('../somepath', '/var/www'));
-        $this->assertEquals('/var/www/somepath', CatalogChecker::getFullPath('./somepath', '/var/www'));
-        $this->assertEquals('/somepath', CatalogChecker::getFullPath('/somepath', '/var/www'));
-        $this->assertEquals('/var/www/somepath', CatalogChecker::getFullPath('somepath', '/var/www'));
+        $catalogChecker = new CatalogChecker('existDir', vfsStream::url('rootDir'));
+        $this->assertEquals(vfsStream::url('rootDir') . '/existDir', $catalogChecker->getFullPath());
     }
 
     public function testCheck()
     {
-        $this->expectException(\Exception::class);
-        CatalogChecker::check(null, 'someappdir');
+        $catalogChecker = new CatalogChecker(null, vfsStream::url('rootDir'));
 
-        $this->assertTrue(CatalogChecker::check('existDir', vfsStream::url('rootDir')));
-        $this->assertFalse(CatalogChecker::check('nonExistDir', vfsStream::url('rootDir')));
+        $this->expectException(\Exception::class);
+        $catalogChecker->check();
+
+        $catalogChecker = new CatalogChecker('existDir', vfsStream::url('rootDir'));
+        $this->assertTrue($catalogChecker->check());
     }
 }

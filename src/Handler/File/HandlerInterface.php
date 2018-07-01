@@ -6,5 +6,5 @@ use File\FileInterface;
 interface HandlerInterface
 {
     public function supports(FileInterface $file): bool;
-    public function handle(FileInterface $file);
+    public function aggregateToHandle(FileInterface $file, $handle);
 }

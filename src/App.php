@@ -1,63 +1,40 @@
 <?php
-use \Catalog\FileLister;
-use \Handler\FileListHandler;
-use \File\Shared\SharedFileManager;
-use \File\Shared\ResultFileManager;
-use \Query\DataSeeder;
-use Log\Logger;
+use \Aggregator\DataAggregatorInterface;
+use \Catalog\TmpDirManagerInterface;
+use Log\LoggerAwareTrait;
 
 class App
 {
-    /**
-     * @var null|string
-     */
-    private $fileDir;
+    use LoggerAwareTrait;
 
     /**
-     * @var string
+     * @var DataAggregatorInterface
      */
-    private $appDir;
+    private $dataAggregator;
 
-    public function __construct(?string $fileDir, string $appDir)
-    {
-        $this->fileDir = $fileDir;
-        $this->appDir = $appDir;
+    /**
+     * @var TmpDirManagerInterface
+     */
+    private $tmpDirManager;
+
+    public function __construct(
+        DataAggregatorInterface $dataAggregator,
+        TmpDirManagerInterface $tmpDirManager
+    ) {
+        $this->dataAggregator = $dataAggregator;
+        $this->tmpDirManager = $tmpDirManager;
     }
 
     public function run()
     {
-        $fileLister = new FileLister($this->appDir);
-        $files = $fileLister->getFileListFromDir($this->fileDir);
+        $this->logger->log('File aggregation started');
 
-        if (!count($files)) {
-            throw new Exception('Data files not found in specified catalog');
-        }
+        $this->tmpDirManager->clearTmpDir(); // Pre clean
 
-        Logger::log("Catalog tree scaned. List of found files:");
-        foreach ($files as $file) {
-            Logger::log('- ' . $file->getFilePath());
-        }
-        Logger::log("Starting data consuming\r\n");
+        $this->dataAggregator->aggregate();
 
-        $sharedFileManager = new SharedFileManager($this->appDir);
-        $sharedFileManager->prepareFile();
+        $this->tmpDirManager->clearTmpDir(); // Post clean
 
-        $handler = new FileListHandler($sharedFileManager);
-        $handler->handleList($files);
-
-        Logger::log("Data consuming finished. Starting data aggregation\r\n");
-
-        DataSeeder::prepareTables();
-        DataSeeder::seedDataTable($sharedFileManager->getFilePath());
-        DataSeeder::aggregateData();
-
-        Logger::log("Data aggregation finished. Starting filling result.csv with aggregated data\r\n");
-
-        $resultFileManager = new ResultFileManager($this->appDir);
-        $resultFileManager->prepareFile();
-        $resultFileManager->fillDataFromDatabase();
-
-        Logger::log("Done. Result aggregated data saved in result.csv");
-        Logger::log("Exiting");
+        $this->logger->log('File aggregation complete. You can get aggregated data from result.csv');
     }
 }

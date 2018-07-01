@@ -6,7 +6,7 @@ use File\FileInterface;
 
 class CSVValidator implements ValidatorInterface
 {
-    public static function validate(string $filePath): bool
+    public function validate(string $filePath): bool
     {
         if (preg_match('/\.csv$/i', $filePath)) {
             return true;
@@ -15,7 +15,7 @@ class CSVValidator implements ValidatorInterface
         return false;
     }
 
-    public static function getFile(string $filePath): FileInterface
+    public function getFile(string $filePath): FileInterface
     {
         return new CSVFile($filePath);
     }

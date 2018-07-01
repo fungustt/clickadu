@@ -1,11 +1,13 @@
 <?php
 namespace Test\Catalog;
 
+use Catalog\FilePathsExtractor;
+use Catalog\Validator\CSVValidator;
+use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 use \Catalog\FileLister;
 use \org\bovigo\vfs\vfsStreamWrapper;
 use \org\bovigo\vfs\vfsStreamDirectory;
-use \org\bovigo\vfs\vfsStream;
 use \org\bovigo\vfs\vfsStreamFile;
 
 class FileListerTest extends TestCase
@@ -17,19 +19,6 @@ class FileListerTest extends TestCase
         vfsStreamWrapper::getRoot()->addChild(new vfsStreamDirectory('subDir'));
     }
 
-    public function testGetFileListFromDirThrowsException()
-    {
-        $lister = new FileLister(vfsStream::url('rootDir'));
-
-        $this->expectException(\Exception::class);
-        $lister->getFileListFromDir('somedir');
-    }
-
-    public function testGetFileListFromDir()
-    {
-        $lister = new FileLister(vfsStream::url('rootDir'));
-        $this->assertEquals([], $lister->getFileListFromDir('subDir'));
-    }
 
     public function testGetFileListFromDirWillReturnJustOneRightFile()
     {
@@ -38,7 +27,9 @@ class FileListerTest extends TestCase
         $catalog->addChild(new vfsStreamFile('file.csv'));
         $catalog->addChild(new vfsStreamFile('file.xml'));
 
-        $lister = new FileLister(vfsStream::url('rootDir'));
-        $this->assertCount(1, $lister->getFileListFromDir('subDir'));
+
+        $extractor = new FilePathsExtractor();
+        $lister = new FileLister($extractor, new CSVValidator());
+        $this->assertCount(1, $lister->getFileList(vfsStream::url('rootDir/subDir')));
     }
 }
